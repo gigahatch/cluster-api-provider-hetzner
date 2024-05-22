@@ -709,5 +709,83 @@ var _ = Describe("HetznerBareMetalMachineReconciler", func() {
 				Expect(testEnv.Update(ctx, bmMachine)).NotTo(Succeed())
 			})
 		})
+
+		Context("validate create", func() {
+			var (
+				hbmmt        *infrav1.HetznerBareMetalMachineTemplate
+				testNs       *corev1.Namespace
+				hbmmtwebhook *infrav1.HetznerBareMetalMachineTemplateWebhook
+			)
+			BeforeEach(func() {
+				var err error
+				testNs, err = testEnv.CreateNamespace(ctx, "hcloudmachine-validation")
+				Expect(err).NotTo(HaveOccurred())
+				hbmmt = &infrav1.HetznerBareMetalMachineTemplate{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      bmMachineName,
+						Namespace: testNs.Name,
+						Labels: map[string]string{
+							clusterv1.ClusterNameLabel: capiCluster.Name,
+						},
+					},
+					Spec: infrav1.HetznerBareMetalMachineTemplateSpec{
+						Template: infrav1.HetznerBareMetalMachineTemplateResource{
+							Spec: getDefaultHetznerBareMetalMachineSpec(),
+						},
+					},
+				}
+				hbmmtwebhook = &infrav1.HetznerBareMetalMachineTemplateWebhook{}
+
+			})
+			AfterEach(func() {
+				Expect(testEnv.Cleanup(ctx, testNs, hbmmt)).To(Succeed())
+			})
+			It("should validate create", func() {
+				warnings, err := hbmmtwebhook.ValidateCreate(ctx, hbmmt)
+				Expect(warnings).To(BeNil())
+				Expect(err).To(BeNil())
+			})
+
+		})
+
+		Context("validate update", func() {
+			var (
+				hbmmt        *infrav1.HetznerBareMetalMachineTemplate
+				oldhbmmt     *infrav1.HetznerBareMetalMachineTemplate
+				testNs       *corev1.Namespace
+				hbmmtwebhook *infrav1.HetznerBareMetalMachineTemplateWebhook
+			)
+			BeforeEach(func() {
+				var err error
+				testNs, err = testEnv.CreateNamespace(ctx, "hcloudmachine-validation")
+				Expect(err).NotTo(HaveOccurred())
+				hbmmt = &infrav1.HetznerBareMetalMachineTemplate{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      bmMachineName,
+						Namespace: testNs.Name,
+						Labels: map[string]string{
+							clusterv1.ClusterNameLabel: capiCluster.Name,
+						},
+					},
+					Spec: infrav1.HetznerBareMetalMachineTemplateSpec{
+						Template: infrav1.HetznerBareMetalMachineTemplateResource{
+							Spec: getDefaultHetznerBareMetalMachineSpec(),
+						},
+					},
+				}
+				hbmmtwebhook = &infrav1.HetznerBareMetalMachineTemplateWebhook{}
+
+			})
+			AfterEach(func() {
+				Expect(testEnv.Cleanup(ctx, testNs, hbmmt)).To(Succeed())
+			})
+			It("should validate update", func() {
+				newhbmmt := hbmmt.DeepCopy()
+				warnings, err := hbmmtwebhook.ValidateUpdate(ctx, oldhbmmt, newhbmmt)
+				Expect(warnings).To(BeNil())
+				Expect(err).To(HaveOccurred())
+			})
+
+		})
 	})
 })

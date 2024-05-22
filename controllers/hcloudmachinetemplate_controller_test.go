@@ -247,5 +247,59 @@ var _ = Describe("HCloudMachineTemplateReconciler", func() {
 				}, timeout, time.Second).Should(BeTrue())
 			})
 		})
+		Context("HCloudMachineTemplate Webhook Validation", func() {
+			var (
+				hcloudMachineTemplate     *infrav1.HCloudMachineTemplate
+				oldHCloudMachineTemplate  *infrav1.HCloudMachineTemplate
+				testNs                    *corev1.Namespace
+				hcloudMachineTemplateHook *infrav1.HCloudMachineTemplateWebhook
+			)
+			BeforeEach(func() {
+				var err error
+				testNs, err = testEnv.CreateNamespace(ctx, "hcloudmachine-validation")
+				Expect(err).NotTo(HaveOccurred())
+				hcloudMachineTemplate = &infrav1.HCloudMachineTemplate{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "hcloud-validation-machine",
+						Namespace: testNs.Name,
+					},
+					Spec: infrav1.HCloudMachineTemplateSpec{
+						Template: infrav1.HCloudMachineTemplateResource{
+							Spec: infrav1.HCloudMachineSpec{
+								Type:      "cpx21",
+								ImageName: "ubuntu-18.04",
+							},
+						},
+					},
+				}
+				oldHCloudMachineTemplate = hcloudMachineTemplate.DeepCopy()
+				hcloudMachineTemplateHook = &infrav1.HCloudMachineTemplateWebhook{}
+			})
+			AfterEach(func() {
+				Expect(testEnv.Cleanup(ctx, testNs, hcloudMachineTemplate)).To(Succeed())
+			})
+			It("should allow valid HCloudMachineTemplate creation", func() {
+				warnings, err := hcloudMachineTemplateHook.ValidateCreate(ctx, hcloudMachineTemplate)
+				Expect(warnings).To(BeNil())
+				Expect(err).To(BeNil())
+			})
+
+			It("should prevent updating immutable fields", func() {
+				newHCloudMachineTemplate := hcloudMachineTemplate.DeepCopy()
+				newHCloudMachineTemplate.Spec.Template.Spec.Type = "cpx32"
+				newHCloudMachineTemplate.Spec.Template.Spec.ImageName = "fedora-control-plane"
+
+				warnings, err := hcloudMachineTemplateHook.ValidateUpdate(ctx, oldHCloudMachineTemplate, newHCloudMachineTemplate)
+				Expect(warnings).To(BeNil())
+				Expect(err).To(HaveOccurred())
+			})
+
+			It("should allow valid HCloudMachineTemplate deletion", func() {
+				warnings, err := hcloudMachineTemplateHook.ValidateDelete(ctx, hcloudMachineTemplate)
+				Expect(warnings).To(BeNil())
+				Expect(err).To(BeNil())
+			})
+		})
+
 	})
 })

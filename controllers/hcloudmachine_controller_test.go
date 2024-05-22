@@ -591,8 +591,9 @@ var _ = Describe("Hetzner secret", func() {
 
 var _ = Describe("HCloudMachine validation", func() {
 	var (
-		hcloudMachine *infrav1.HCloudMachine
-		testNs        *corev1.Namespace
+		hcloudMachine    *infrav1.HCloudMachine
+		oldHCloudMachine *infrav1.HCloudMachine
+		testNs           *corev1.Namespace
 	)
 
 	BeforeEach(func() {
@@ -610,6 +611,9 @@ var _ = Describe("HCloudMachine validation", func() {
 				Type:      "cpx31",
 			},
 		}
+		oldHCloudMachine = hcloudMachine.DeepCopy()
+		oldHCloudMachine.Spec.Type = "cpx21"
+		oldHCloudMachine.Spec.ImageName = "fedora-control-plane-old"
 	})
 
 	AfterEach(func() {
@@ -624,6 +628,26 @@ var _ = Describe("HCloudMachine validation", func() {
 	It("should fail without imageName", func() {
 		hcloudMachine.Spec.ImageName = ""
 		Expect(testEnv.Create(ctx, hcloudMachine)).ToNot(Succeed())
+	})
+	It("should allow valid HCloudMachine creation", func() {
+		warnings, err := hcloudMachine.ValidateCreate()
+		Expect(warnings).To(BeNil())
+		Expect(err).To(BeNil())
+	})
+	It("should prevent updating immutable fields", func() {
+		newHCloudMachine := hcloudMachine.DeepCopy()
+		newHCloudMachine.Spec.Type = "cpx32"
+		newHCloudMachine.Spec.ImageName = "fedora-control-plane"
+
+		warnings, err := newHCloudMachine.ValidateUpdate(oldHCloudMachine)
+		Expect(warnings).To(BeNil())
+		Expect(err).To(HaveOccurred())
+		Expect(err.Error()).To(ContainSubstring("field is immutable"))
+	})
+	It("should allow valid HCloudMachine deleteion", func() {
+		warnings, err := hcloudMachine.ValidateDelete()
+		Expect(warnings).To(BeNil())
+		Expect(err).To(BeNil())
 	})
 })
 
