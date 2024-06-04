@@ -762,19 +762,6 @@ func (s *Service) analyzeSSHErrorRegistering(sshErr error) (isSSHTimeoutError, i
 		}
 		reterr = fmt.Errorf("wrong ssh key: %w", sshErr)
 	case sshclient.IsConnectionRefusedError(sshErr):
-		// We can still escalate if it is not a hardware reboot.
-		// Therefore we don't have to check whether the reboot might not have triggered
-		if s.scope.HetznerBareMetalHost.Spec.Status.ErrorType != infrav1.ErrorTypeHardwareRebootTriggered {
-			// check if the reboot triggered
-			rebootTriggered, err := s.rebootTriggered()
-			if err != nil {
-				return false, false, fmt.Errorf("failed to check whether reboot triggered: %w", err)
-			}
-			if !rebootTriggered {
-				// Reboot did not trigger
-				return false, false, nil
-			}
-		}
 		isConnectionRefused = true
 
 	default:
