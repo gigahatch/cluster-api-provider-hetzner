@@ -511,6 +511,9 @@ func (s *Service) handleErrorTypeHardwareRebootFailed(isSSHTimeoutError, wantsRe
 	// if hardware reboots time out, we should fail
 	if hasTimedOut(s.scope.HetznerBareMetalHost.Spec.Status.LastUpdated, hardwareResetTimeout) {
 		msg := "reboot timed out - please check if server is working properly"
+		if wantsRescue {
+			msg = "The rescue system could not be reached. Please ensure that the machine tries to boot from network before booting from disk. This setting needs to be enabled permanently in the BIOS."
+		}
 		conditions.MarkFalse(
 			s.scope.HetznerBareMetalHost,
 			infrav1.ProvisionSucceededCondition,
