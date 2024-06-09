@@ -25,7 +25,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-export BUILDER_IMAGE=ghcr.io/syself/caph-builder
+export BUILDER_IMAGE=ghcr.io/gigahatch/caph-builder
 
 REPO_ROOT=$(realpath $(dirname "${BASH_SOURCE[0]}")/..)
 cd "${REPO_ROOT}" || exit 1
@@ -58,12 +58,12 @@ fi
 echo "$NEW_VERSION" > .builder-image-version.txt
 echo "Wrote new version $NEW_VERSION to .builder-image-version.txt"
 
-if docker manifest inspect ghcr.io/syself/caph-builder:${NEW_VERSION} > /dev/null ; echo $?; then
+if docker manifest inspect ghcr.io/gigahatch/caph-builder:${NEW_VERSION} > /dev/null ; echo $?; then
   
   sed -i -e "/^BUILDER_IMAGE_VERSION /s/:=.*$/:= ${NEW_VERSION}/" Makefile
-  grep -r -E 'ghcr.io/syself/caph-builder:[0-9].*.*' -l | xargs sed -i -e "s/ghcr.io\/syself\/caph-builder:${VERSION}/ghcr.io\/syself\/caph-builder:${NEW_VERSION}/g"
-  docker build -t ghcr.io/syself/caph-builder:${NEW_VERSION}  ./images/builder
-  docker push ghcr.io/syself/caph-builder:${NEW_VERSION}
+  grep -r -E 'ghcr.io/gigahatch/caph-builder:[0-9].*.*' -l | xargs sed -i -e "s/ghcr.io\/gigahatch\/caph-builder:${VERSION}/ghcr.io\/gigahatch\/caph-builder:${NEW_VERSION}/g"
+  docker build -t ghcr.io/gigahatch/caph-builder:${NEW_VERSION}  ./images/builder
+  docker push ghcr.io/gigahatch/caph-builder:${NEW_VERSION}
 else
   exit 1
 fi
