@@ -59,6 +59,9 @@ type HetznerClusterSpec struct {
 	// HetznerSecretRef is a reference to a token to be used when reconciling this cluster.
 	// This is generated in the security section under API TOKENS. Read & write is necessary.
 	HetznerSecret HetznerSecretRef `json:"hetznerSecretRef"`
+
+	// GigahatchCloudSecretRef is a reference to a secret containing the Gigahatch Cloud API token.
+	GigahatchCloudSecret GigahatchCloudSecretRef `json:"gigahatchCloudSecretRef"`
 }
 
 // HetznerClusterStatus defines the observed state of HetznerCluster.
