@@ -13,8 +13,8 @@
 # limitations under the License.
 
 INFRA_SHORT = caph
-IMAGE_PREFIX ?= ghcr.io/syself
-INFRA_PROVIDER = hetzner
+IMAGE_PREFIX ?= ghcr.io/gigahatch
+INFRA_PROVIDER = gigahatch-hetzner
 
 STAGING_IMAGE = $(INFRA_SHORT)-staging
 BUILDER_IMAGE = $(IMAGE_PREFIX)/$(INFRA_SHORT)-builder

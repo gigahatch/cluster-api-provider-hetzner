@@ -18,7 +18,7 @@ on:
       - "test/e2e/**"
 env:
   IMAGE_NAME: caph-staging
-  REGISTRY: ghcr.io/syself
+  REGISTRY: ghcr.io/gigahatch
   metadata_flavor: latest=false
   metadata_tags: type=ref,event=pr
   registry_password: ${{ secrets.GITHUB_TOKEN }}

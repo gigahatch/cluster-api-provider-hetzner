@@ -71,7 +71,7 @@
       description: "disable update of caph builder image",
       matchManagers: ["github-actions"],
       matchUpdateTypes: ["major", "minor", "patch"],
-      matchPackageNames: ["ghcr.io/syself/caph-builder"],
+      matchPackageNames: ["ghcr.io/gigahatch/caph-builder"],
       enabled: false,
     },
   ]
