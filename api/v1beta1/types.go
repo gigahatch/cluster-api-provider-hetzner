@@ -130,6 +130,15 @@ type HetznerSecretKeyRef struct {
 	SSHKey string `json:"sshKey"`
 }
 
+type GigahatchCloudSecretRef struct {
+	Name string                     `json:"name"`
+	Key  GigahatchCloudSecretKeyRef `json:"key"`
+}
+
+type GigahatchCloudSecretKeyRef struct {
+	HCloudToken string `json:"hcloudToken"`
+}
+
 // PublicNetworkSpec contains specs about the public network spec of an HCloud server.
 type PublicNetworkSpec struct {
 	// EnableIPv4 defines whether server has IPv4 address enabled.

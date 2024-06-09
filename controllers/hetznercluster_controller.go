@@ -499,7 +499,7 @@ func reconcileTargetSecret(ctx context.Context, clusterScope *scope.ClusterScope
 
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      clusterScope.HetznerCluster.Spec.HetznerSecret.Name,
+			Name:      clusterScope.HetznerCluster.Spec.GigahatchCloudSecret.Name,
 			Namespace: metav1.NamespaceSystem,
 		},
 	}
@@ -508,7 +508,7 @@ func reconcileTargetSecret(ctx context.Context, clusterScope *scope.ClusterScope
 	_, err = controllerutil.CreateOrUpdate(ctx, client, secret, func() error {
 		tokenSecretName := types.NamespacedName{
 			Namespace: clusterScope.HetznerCluster.Namespace,
-			Name:      clusterScope.HetznerCluster.Spec.HetznerSecret.Name,
+			Name:      clusterScope.HetznerCluster.Spec.GigahatchCloudSecret.Name,
 		}
 		secretManager := secretutil.NewSecretManager(clusterScope.Logger, clusterScope.Client, clusterScope.APIReader)
 		tokenSecret, err := secretManager.AcquireSecret(ctx, tokenSecretName, clusterScope.HetznerCluster, false, clusterScope.HetznerCluster.DeletionTimestamp.IsZero())
@@ -516,10 +516,10 @@ func reconcileTargetSecret(ctx context.Context, clusterScope *scope.ClusterScope
 			return fmt.Errorf("failed to acquire secret: %w", err)
 		}
 
-		hetznerToken, keyExists := tokenSecret.Data[clusterScope.HetznerCluster.Spec.HetznerSecret.Key.HCloudToken]
+		hetznerToken, keyExists := tokenSecret.Data[clusterScope.HetznerCluster.Spec.GigahatchCloudSecret.Key.HCloudToken]
 		if !keyExists {
 			return fmt.Errorf("error key %s does not exist in secret/%s: %w",
-				clusterScope.HetznerCluster.Spec.HetznerSecret.Key.HCloudToken,
+				clusterScope.HetznerCluster.Spec.GigahatchCloudSecret.Key.HCloudToken,
 				tokenSecretName,
 				err,
 			)
@@ -529,15 +529,15 @@ func reconcileTargetSecret(ctx context.Context, clusterScope *scope.ClusterScope
 			secret.Data = make(map[string][]byte)
 		}
 
-		secret.Data[clusterScope.HetznerCluster.Spec.HetznerSecret.Key.HCloudToken] = hetznerToken
+		secret.Data[clusterScope.HetznerCluster.Spec.GigahatchCloudSecret.Key.HCloudToken] = hetznerToken
 
-		// Save robot credentials if available
-		if clusterScope.HetznerCluster.Spec.HetznerSecret.Key.HetznerRobotUser != "" {
-			robotUserName := tokenSecret.Data[clusterScope.HetznerCluster.Spec.HetznerSecret.Key.HetznerRobotUser]
-			secret.Data[clusterScope.HetznerCluster.Spec.HetznerSecret.Key.HetznerRobotUser] = robotUserName
-			robotPassword := tokenSecret.Data[clusterScope.HetznerCluster.Spec.HetznerSecret.Key.HetznerRobotPassword]
-			secret.Data[clusterScope.HetznerCluster.Spec.HetznerSecret.Key.HetznerRobotPassword] = robotPassword
-		}
+		//// Save robot credentials if available
+		//if clusterScope.HetznerCluster.Spec.HetznerSecret.Key.HetznerRobotUser != "" {
+		//robotUserName := tokenSecret.Data[clusterScope.HetznerCluster.Spec.HetznerSecret.Key.HetznerRobotUser]
+		//secret.Data[clusterScope.HetznerCluster.Spec.HetznerSecret.Key.HetznerRobotUser] = robotUserName
+		//robotPassword := tokenSecret.Data[clusterScope.HetznerCluster.Spec.HetznerSecret.Key.HetznerRobotPassword]
+		//secret.Data[clusterScope.HetznerCluster.Spec.HetznerSecret.Key.HetznerRobotPassword] = robotPassword
+		//}
 
 		// Save network ID in secret
 		if clusterScope.HetznerCluster.Spec.HCloudNetwork.Enabled {
