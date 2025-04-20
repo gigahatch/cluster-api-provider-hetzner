@@ -215,6 +215,23 @@ spec:
                           - sin
                           type: string
                         type: array
+                      gigahatchCloudSecretRef:
+                        description: GigahatchCloudSecretRef is a reference to a secret
+                          containing the Gigahatch Cloud API token.
+                        properties:
+                          key:
+                            properties:
+                              hcloudToken:
+                                type: string
+                            required:
+                            - hcloudToken
+                            type: object
+                          name:
+                            type: string
+                        required:
+                        - key
+                        - name
+                        type: object
                       hcloudNetwork:
                         description: HCloudNetwork defines details about the private
                           Network for Hetzner Cloud. If left empty, no private Network
@@ -362,6 +379,7 @@ spec:
                         type: object
                     required:
                     - controlPlaneRegions
+                    - gigahatchCloudSecretRef
                     - hetznerSecretRef
                     - sshKeys
                     type: object

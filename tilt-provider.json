@@ -1,5 +1,5 @@
 {
-    "name": "hetzner",
+    "name": "gigahatch-hetzner",
     "config": {
       "image": "ghcr.io/gigahatch/caph-staging",
       "live_reload_deps": [
