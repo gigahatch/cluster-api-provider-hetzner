@@ -131,6 +131,10 @@ func (r *HetznerCluster) ValidateCreate() (admission.Warnings, error) {
 		allErrs = append(allErrs, err)
 	}
 
+    if err := r.validateGigahatchSecretKey(); err != nil {
+        allErrs = append(allErrs, err)
+    }
+
 	return nil, aggregateObjErrors(r.GroupVersionKind().GroupKind(), r.Name, allErrs)
 }
 
@@ -204,6 +208,10 @@ func (r *HetznerCluster) ValidateUpdate(old runtime.Object) (admission.Warnings,
 		allErrs = append(allErrs, err)
 	}
 
+    if err := r.validateGigahatchSecretKey(); err != nil {
+        allErrs = append(allErrs, err)
+    }
+
 	return nil, aggregateObjErrors(r.GroupVersionKind().GroupKind(), r.Name, allErrs)
 }
 
@@ -218,6 +226,18 @@ func (r *HetznerCluster) validateHetznerSecretKey() *field.Error {
 		)
 	}
 	return nil
+}
+
+func (r *HetznerCluster) validateGigahatchSecretKey() *field.Error {
+    // Gigahatch secret key needs to contain Gigahatch credentials
+    if r.Spec.GigahatchCloudSecret.Key.HCloudToken == "" || r.Spec.GigahatchCloudSecret.Name == "" {
+        return field.Invalid(
+            field.NewPath("spec", "gigahatchSecret", "key"),
+            r.Spec.GigahatchCloudSecret,
+            "need to specify credentials for Gigahatch Cloud",
+        )
+    }
+    return nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type.
